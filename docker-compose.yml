@@ -1,0 +1,97 @@
+# CoreServices - Servizi infrastrutturali condivisi per la suite Core*
+#
+# Avvio:   docker-compose -f docker-compose.services.yml up -d
+# Stop:    docker-compose -f docker-compose.services.yml down
+# Logs:    docker-compose -f docker-compose.services.yml logs -f
+
+services:
+  # MySQL Database - Condiviso tra tutti i progetti Core*
+  mysql:
+    image: mysql:8.0
+    container_name: core-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - core-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PHPMyAdmin - Interfaccia web per MySQL
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: core-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      # Se vuoi login automatico con user specifico invece di root, commenta le righe sopra e usa:
+      # PMA_USER: coremachine
+      # PMA_PASSWORD: password
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - core-network
+
+  # MinIO Object Storage - S3-compatible storage
+  minio:
+    image: minio/minio:latest
+    container_name: core-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console web
+    networks:
+      - core-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Meilisearch - Full-text search engine
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: core-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-masterKeyChangeThis}
+      MEILI_ENV: ${MEILI_ENV:-production}
+    volumes:
+      - meilisearch-data:/meili_data
+    ports:
+      - "7700:7700"
+    networks:
+      - core-network
+
+# Volumi persistenti
+volumes:
+  mysql-data:
+    name: core-mysql-data
+  minio-data:
+    name: core-minio-data
+  meilisearch-data:
+    name: core-meilisearch-data
+
+# Network condivisa - Tutti i progetti Core* possono unirsi a questa network
+networks:
+  core-network:
+    name: core-network
+    driver: bridge
