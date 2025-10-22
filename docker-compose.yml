@@ -81,31 +81,18 @@ services:
     networks:
       - core-network
 
-  # Nginx Proxy Manager - GUI per gestione reverse proxy
-  nginx-proxy-manager:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: core-nginx-proxy-manager
+  # Nginx Reverse Proxy - Centralizzato per tutte le app Core*
+  nginx:
+    image: nginx:alpine
+    container_name: core-nginx
     restart: unless-stopped
     ports:
-      - "80:80"     # HTTP - CoreMachine
-      - "81:81"     # HTTP - CoreDocument
+      - "80:80"     # CoreMachine
+      - "81:81"     # CoreDocument
       - "443:443"   # HTTPS (futuro)
-      - "8181:81"   # Admin GUI
-    environment:
-      # Usa MySQL condiviso
-      DB_MYSQL_HOST: "mysql"
-      DB_MYSQL_PORT: 3306
-      DB_MYSQL_USER: "root"
-      DB_MYSQL_PASSWORD: "rootpassword"
-      DB_MYSQL_NAME: "corenpm"
-      # Disabilita IPv6 se da problemi
-      DISABLE_IPV6: "true"
     volumes:
-      - ./nginx-proxy-manager/data:/data
-      - ./nginx-proxy-manager/letsencrypt:/etc/letsencrypt
-    depends_on:
-      mysql:
-        condition: service_healthy
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     networks:
       - core-network
 
