@@ -31,11 +31,8 @@ services:
     restart: unless-stopped
     environment:
       PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      # Se vuoi login automatico con user specifico invece di root, commenta le righe sopra e usa:
-      # PMA_USER: coremachine
-      # PMA_PASSWORD: password
+      PMA_ARBITRARY: 1  # Permette login con qualsiasi utente MySQL
+      # Rimuovi PMA_USER e PMA_PASSWORD per mostrare il form di login
     ports:
       - "8080:80"
     depends_on:
