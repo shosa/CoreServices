@@ -105,8 +105,9 @@ services:
       - "80:80"     # CoreHub (Dashboard)
       - "81:81"     # CoreMachine
       - "82:82"     # CoreDocument
-      - "83:83"     # CoreVisitor
+      - "83:83"     # CoreVisitor (Frontend)
       - "84:84"     # CoreGre (ERP/PHP)
+      - "85:85"     # CoreVisitor Kiosk (PWA)
       - "443:443"   # HTTPS (futuro)
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
