@@ -96,6 +96,19 @@ services:
       timeout: 3s
       retries: 3
 
+  # ZplBox - Servizio di stampa ZPL via HTML/CSS rendering
+  # https://github.com/ricebean-net/zplbox
+  # Il container espone internamente la porta 8080 (non configurabile)
+  # Mappiamo 7272 host → 8080 container per non conflittare con phpMyAdmin (8080)
+  zplbox:
+    image: ghcr.io/ricebean-net/zplbox:latest
+    container_name: core-zplbox
+    restart: unless-stopped
+    ports:
+      - "7272:8080"
+    networks:
+      - core-network
+
   # Nginx Reverse Proxy - Centralizzato per tutte le app Core*
   nginx:
     image: nginx:alpine
@@ -110,6 +123,7 @@ services:
       - "85:85"     # CoreVisitor Kiosk (PWA)
       - "86:86"     # CoreGREJS
       - "88:88"     # CoreCanvas
+      - "89:89"     # ZplBox
       - "443:443"   # HTTPS (futuro)
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
