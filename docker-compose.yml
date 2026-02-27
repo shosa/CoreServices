@@ -125,7 +125,7 @@ services:
       - "88:88"     # CoreCanvas
       - "89:89"     # ZplBox
       - "443:443"   # HTTPS (futuro)
-      - "631:631"   # CUPS (proxy verso host Linux)
+      - "6310:631"  # CUPS (proxy verso host Linux, la 631 host è occupata da cupsd)
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
