@@ -124,6 +124,7 @@ services:
       - "86:86"     # CoreGREJS
       - "88:88"     # CoreCanvas
       - "89:89"     # ZplBox
+      - "90:90"     # Terminalino
       - "443:443"   # HTTPS (futuro)
       - "6310:631"  # CUPS (proxy verso host Linux, la 631 host è occupata da cupsd)
     volumes:
